@@ -14,16 +14,25 @@ type WithScenarios<T extends RechainifySteps> = {
   [K in keyof T]: RechainifyStepHandler<T, K>
 }
 
-type RechainifyStepHandler<T extends RechainifySteps, C extends keyof T> = WithScenarios<T> & (
+type WithPlainHandler<Input, Result> = undefined extends Input
+  ? { (input?: Input): Result }
+  : { (input: Input): Result } 
+
+type WithFactoryHandler<T extends RechainifySteps, Opts, Input, Result> = {
+  (options: Opts, input: Input): Result
+  (options: Opts): WithScenarios<T> & (
+    undefined extends Input ? (input?: Input) => Result : (input: Input) => Result
+  )
+} 
+
+type WithHandlers<T extends RechainifySteps, C extends keyof T> =
   T[C] extends (a: infer InputOrOpts) => infer FuncOrResult
     ? FuncOrResult extends (c: infer Input) => infer Result
-      ? {
-        (options: InputOrOpts, input: Input): Result
-        (options: InputOrOpts): WithScenarios<T> & FuncOrResult
-      }
-      : { (input: InputOrOpts): FuncOrResult }
-    : {}
-)
+      ? WithFactoryHandler<T, InputOrOpts, Input, Result>
+      : WithPlainHandler<InputOrOpts, FuncOrResult>
+    : {} 
+
+type RechainifyStepHandler<T extends RechainifySteps, C extends keyof T> = WithScenarios<T> & WithHandlers<T, C>
 
 type ToRecord<T extends RechainifySteps> = T extends RechainifyTupleSteps
   ? T extends readonly [infer Head, ...infer Rest] 

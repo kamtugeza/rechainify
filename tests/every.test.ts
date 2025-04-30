@@ -13,6 +13,7 @@ function buildTest () {
     }, 
     number: (input: unknown) => typeof input === 'number' ? input * 2 : null,
     positive: (input: unknown) => typeof input === 'number' && input >=0  ? input : null,
+    infinite: (input: unknown = Infinity) => !Number.isFinite(input) ? input : null,
   })
 }
 
@@ -97,4 +98,11 @@ it('returns the result of the last step if all steps returns non-null values', (
   expect(chain.currency('$').number.positive.gte(10, 5)).toBe(null)
   expect(chain.currency('$').number.positive.gte(10, '$2')).toBe(null)
   expect(chain.currency('$').number.positive.gte(10, '$5')).toBe(10)
+})
+
+it('returns fallback value when there is no input value', () => {
+  const chain = buildTest()
+
+  expect(chain.infinite()).toEqual(Infinity)
+  expect(chain.infinite(5)).toEqual(null)
 })

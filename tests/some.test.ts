@@ -13,7 +13,10 @@ function buildTest () {
     },
     number: (input: unknown) => typeof input === 'number' ? input * 2 : null,
     string: (input: unknown) => typeof input === 'string' ? `${input}!` : null,
-  }) 
+    person: (input: unknown = {}) => !!input && typeof input === 'object' && 'person' in input
+      ? input
+      : null,
+  })
 
   return { chain }
 }
@@ -88,4 +91,11 @@ it('returns the result of the first step, which is not `null`', () => {
 
   expect(chain.currency('€').gte(6).number.string(100)).toBe(100)
   expect(chain.currency('€').gte(6).number.string('€99.99')).toBe(99.99)
+})
+
+it('returns fallback value when there is no input value', () => {
+  const { chain } = buildTest()
+
+  expect(chain.person()).toEqual(null)
+  expect(chain.person({ person: true })).toEqual({ person: true })
 })

@@ -1,6 +1,6 @@
 {
   "name": "rechainify",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Lightweight utilities for composing and executing chained data validations and transformations.",
   "keywords": [
     "build",
